@@ -23,7 +23,6 @@ async function call() {
   socket = create_signaling_connection();
   add_signaling_handlers(socket);
   call_room(socket);
-
   // Create peerConneciton and add handlers
   peerConnection = create_peerconnection(localStream);
   add_peerconnection_handlers(peerConnection);
@@ -46,33 +45,37 @@ async function enable_camera() {
 
   // *** TODO ***: use getUserMedia to get a local media stream from the camera.
   //               If this fails, use getDisplayMedia to get a screen sharing stream.
-  var fail = false;
-  var videoStream;
 
-  navigator.mediaDevices.getUserMedia(constraints)
-    .then(stream => {
-        console.log('Got MediaStream:', stream);
-        document.getElementById('localVideo').srcObject = stream;
-        videoStream = stream;
-    })
-    .catch(error => {
-        fail = true;
-        console.error('Error accessing video device.', error);
-    });
-  
-  if(fail){
-    navigator.mediaDevices.getDisplayMedia(constraints)
-    .then(stream => {
-        console.log('Got MediaStream:', stream);
-        videoStream = stream;
-    })
-    .catch(error => {
-        console.error('Error accessing sharing', error);
-        document.getElementById('localVideo').srcObject = stream;
-    });
+  const openMediaDevices = async (constraints) => {
+    console.log(constraints);
+    return await navigator.mediaDevices.getUserMedia(constraints);
   }
 
-  return videoStream;
+  const openMediaSharing = async (constraints) => {
+    return await navigator.mediaDevices.getDisplayMedia(constraints);
+  }
+
+  var stream;
+
+  try {
+    stream = await openMediaDevices(constraints);
+    console.log('Got video stream:', stream);
+
+  } catch(error) {
+      console.error('Error accessing media devices.', error);
+      console.error('Trying screen sharing', error);
+
+      try {
+        stream = await openMediaSharing(constraints);
+        console.log('Got sharing stream:', stream);
+      } catch(error) {
+          console.error('Error accessing screen sharing', error);
+          alert('Error accessing screen sharing');
+      }
+  }
+
+  document.getElementById('localVideo').srcObject = stream;
+  return stream;
 }
 
 // ==========================================================================
@@ -85,7 +88,6 @@ function create_signaling_connection() {
   // *** TODO ***: create a socket by simply calling the io() function
   //               provided by the socket.io library (included in index.html).
   var socket = io();
-  console.log("socket created");
   return socket;
 }
 
@@ -161,9 +163,12 @@ function create_peerconnection(localStream) {
   const pcConfiguration = {'iceServers': [{'urls': 'stun:stun.l.google.com:19302'}]}
 
   // *** TODO ***: create a new RTCPeerConnection with this configuration
-  //var pc = ...
+  var pc = new RTCPeerConnection(pcConfiguration);
 
   // *** TODO ***: add all tracks of the local stream to the peerConnection
+  localStream.getTracks().forEach(track => {
+    pc.addTrack(track, localStream);
+  });
 
   return pc;
 }
