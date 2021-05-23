@@ -116,27 +116,27 @@ function add_signaling_handlers(socket) {
   // --------------------------------------------------------
   // *** TODO ***: use the 'socket.on' method to create signaling message handlers:
   // new_peer --> handle_new_peer
-  // invite --> handle_invite
-  // ok --> handle_ok
-  // ice_candidate --> handle_remote_icecandidate
-  // bye --> hangUp
 
   socket.on('new_peer', (room) => 
     handle_new_peer(room)
   );
 
+  // invite --> handle_invite
   socket.on('invite', (offer) => 
     handle_invite(offer)
   );
 
+  // ok --> handle_ok
   socket.on('ok', (answer) => 
     handle_ok(answer)
   );
 
+  // ice_candidate --> handle_remote_icecandidate
   socket.on('ice_candidate', (candidate) => 
     handle_remote_icecandidate(candidate)
   );
 
+  // bye --> hangUp
   socket.on('bye', () => 
     hangUp()
   );
@@ -180,8 +180,19 @@ function add_peerconnection_handlers(peerConnection) {
 
   // *** TODO ***: add event handlers on the peerConnection
   // onicecandidate -> handle_local_icecandidate
+  pc.onicecandidate = function(event) {
+    handle_local_icecandidate(event);
+  }
+
   // ontrack -> handle_remote_track
+  pc.ontrack = function(event) {
+    handle_remote_track(event);
+  }
+
   // ondatachannel -> handle_remote_datachannel
+  pc.ondatachannel = function(event) {
+    handle_remote_datachannel(event);
+  }
 }
 
 // ==========================================================================
