@@ -84,7 +84,8 @@ async function enable_camera() {
 function create_signaling_connection() {
   // *** TODO ***: create a socket by simply calling the io() function
   //               provided by the socket.io library (included in index.html).
-  // var socket = ...
+  var socket = io();
+  console.log("socket created");
   return socket;
 }
 
@@ -97,6 +98,17 @@ function add_signaling_handlers(socket) {
   //               messages 'created', 'joined', 'full'.
   //               For all three messages, simply write a console log.
 
+  socket.on('created', () => 
+    console.log("created")
+  );
+
+  socket.on('joined', () => 
+    console.log("joined")
+  );
+
+  socket.on('full', (message) => 
+    console.log("full")
+  );
 
   // Event handlers for call establishment signaling messages
   // --------------------------------------------------------
@@ -107,6 +119,25 @@ function add_signaling_handlers(socket) {
   // ice_candidate --> handle_remote_icecandidate
   // bye --> hangUp
 
+  socket.on('new_peer', (room) => 
+    handle_new_peer(room)
+  );
+
+  socket.on('invite', (offer) => 
+    handle_invite(offer)
+  );
+
+  socket.on('ok', (answer) => 
+    handle_ok(answer)
+  );
+
+  socket.on('ice_candidate', (candidate) => 
+    handle_remote_icecandidate(candidate)
+  );
+
+  socket.on('bye', () => 
+    hangUp()
+  );
 }
 
 // --------------------------------------------------------------------------
@@ -116,7 +147,7 @@ function call_room(socket) {
   if (room != '') {
       console.log('Joining room: ' + room);
       // *** TODO ***: send a join message to the server with room as argument.
-
+      socket.emit('join', room);
   }
 }
 
