@@ -116,7 +116,6 @@ function add_signaling_handlers(socket) {
   // --------------------------------------------------------
   // *** TODO ***: use the 'socket.on' method to create signaling message handlers:
   // new_peer --> handle_new_peer
-
   socket.on('new_peer', (room) => 
     handle_new_peer(room)
   );
@@ -180,17 +179,17 @@ function add_peerconnection_handlers(peerConnection) {
 
   // *** TODO ***: add event handlers on the peerConnection
   // onicecandidate -> handle_local_icecandidate
-  pc.onicecandidate = function(event) {
+  peerConnection.onicecandidate = function(event) {
     handle_local_icecandidate(event);
   }
 
   // ontrack -> handle_remote_track
-  pc.ontrack = function(event) {
+  peerConnection.ontrack = function(event) {
     handle_remote_track(event);
   }
 
   // ondatachannel -> handle_remote_datachannel
-  pc.ondatachannel = function(event) {
+  peerConnection.ondatachannel = function(event) {
     handle_remote_datachannel(event);
   }
 }
