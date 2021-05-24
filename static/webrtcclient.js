@@ -278,7 +278,6 @@ async function handle_remote_icecandidate(candidate) {
 function handle_remote_track(event) {
   console.log('Received remote track: ', event);
   // *** TODO ***: get the first stream of the event and show it in remoteVideo
-  console.log(event);
   document.getElementById('remoteVideo').srcObject = event.streams[0];
 }
 
@@ -292,15 +291,15 @@ function create_datachannel(peerConnection) {
   console.log('Creating dataChannel. I am the Caller.');
 
   // *** TODO ***: create a dataChannel on the peerConnection
-  var dataChannel = peerConnection.createDataChannel("chat");
+  dataChannel = peerConnection.createDataChannel("chat");
 
   // *** TODO ***: connect the handlers onopen and onmessage to the handlers below
   //dataChannel. ...
-  channel.onopen = function(event) {
+  dataChannel.onopen = function(event) {
     handle_datachannel_open(event);
   }
 
-  channel.onmessage = function(event) {
+  dataChannel.onmessage = function(event) {
     handle_datachannel_message(event);
   }
 }
@@ -311,13 +310,14 @@ function handle_remote_datachannel(event) {
   console.log('Received remote dataChannel. I am Callee.');
 
   // *** TODO ***: get the data channel from the event
-  var channel = event.channel;
+  var remoteDataChannel = event.channel;
+
   // *** TODO ***: add event handlers for onopen and onmessage events to the dataChannel
-  channel.onopen = function(event) {
+  remoteDataChannel.onopen = function(event) {
     handle_datachannel_open(event);
   }
 
-  channel.onmessage = function(event) {
+  remoteDataChannel.onmessage = function(event) {
     handle_datachannel_message(event);
   }
 }
