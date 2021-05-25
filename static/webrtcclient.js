@@ -100,16 +100,16 @@ function add_signaling_handlers(socket) {
   //               messages 'created', 'joined', 'full'.
   //               For all three messages, simply write a console log.
 
-  socket.on('created', () => 
-    console.log("created")
+  socket.on('created', (message) => 
+    console.log("created : ")
   );
 
-  socket.on('joined', () => 
-    console.log("joined")
+  socket.on('joined', (message) => 
+    console.log("joined : " + message)
   );
 
   socket.on('full', (message) => 
-    console.log("full")
+    console.log("full : " + message)
   );
 
   // Event handlers for call establishment signaling messages
@@ -162,7 +162,7 @@ function create_peerconnection(localStream) {
   const pcConfiguration = {'iceServers': [{'urls': 'stun:stun.l.google.com:19302'}]}
 
   // *** TODO ***: create a new RTCPeerConnection with this configuration
-  var pc = new RTCPeerConnection(pcConfiguration);
+  var pc = new RTCPeerConnection([pcConfiguration]);
 
   // *** TODO ***: add all tracks of the local stream to the peerConnection
   localStream.getTracks().forEach(track => {
@@ -265,7 +265,7 @@ async function handle_local_icecandidate(event) {
 async function handle_remote_icecandidate(candidate) {
   console.log('Received remote ICE candidate: ', candidate);
   // *** TODO ***: add the received remote ICE candidate to the peerConnection 
-  peerConnection.addIceCandidate(candidate)
+  await peerConnection.addIceCandidate(candidate)
 }
 
 // ==========================================================================
@@ -310,14 +310,14 @@ function handle_remote_datachannel(event) {
   console.log('Received remote dataChannel. I am Callee.');
 
   // *** TODO ***: get the data channel from the event
-  var remoteDataChannel = event.channel;
+  dataChannel = event.channel;
 
   // *** TODO ***: add event handlers for onopen and onmessage events to the dataChannel
-  remoteDataChannel.onopen = function(event) {
+  dataChannel.onopen = function(event) {
     handle_datachannel_open(event);
   }
 
-  remoteDataChannel.onmessage = function(event) {
+  dataChannel.onmessage = function(event) {
     handle_datachannel_message(event);
   }
 }
