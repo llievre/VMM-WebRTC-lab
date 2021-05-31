@@ -45,7 +45,6 @@ async function enable_camera() {
 
   // *** TODO ***: use getUserMedia to get a local media stream from the camera.
   //               If this fails, use getDisplayMedia to get a screen sharing stream.
-
   const openMediaDevices = async (constraints) => {
     console.log(constraints);
     return await navigator.mediaDevices.getUserMedia(constraints);
@@ -100,16 +99,16 @@ function add_signaling_handlers(socket) {
   //               messages 'created', 'joined', 'full'.
   //               For all three messages, simply write a console log.
 
-  socket.on('created', (message) => 
-    console.log("created : ")
+  socket.on('created', (data) => 
+    console.log("created : " + data)
   );
 
-  socket.on('joined', (message) => 
-    console.log("joined : " + message)
+  socket.on('joined', (data) => 
+    console.log("joined : " + data)
   );
 
-  socket.on('full', (message) => 
-    console.log("full : " + message)
+  socket.on('full', (data) => 
+    console.log("full : " + data)
   );
 
   // Event handlers for call establishment signaling messages
@@ -187,7 +186,7 @@ function add_peerconnection_handlers(peerConnection) {
   peerConnection.ontrack = function(event) {
     handle_remote_track(event);
   }
-
+  
   // ondatachannel -> handle_remote_datachannel
   peerConnection.ondatachannel = function(event) {
     handle_remote_datachannel(event);
@@ -355,24 +354,47 @@ function hangUp() {
   // *** TODO ***: Write a console log
   console.log('Connection will be terminated');
   // *** TODO ***: send a bye message with the room name to the server
-  socket.emit('bye', room); 
+  if(socket){
+    socket.emit('bye', room); 
+  }
 
   // Switch off the local stream by stopping all tracks of the local stream
-  var localVideo = document.getElementById('localVideo')
-  var remoteVideo = document.getElementById('remoteVideo')
+  var localVideo = document.getElementById('localVideo');
+  var remoteVideo = document.getElementById('remoteVideo');
+
   // *** TODO ***: remove the tracks from localVideo and remoteVideo
+  if(localVideo.srcObject){
+    localVideo.srcObject.getTracks().forEach(track => {
+      track.stop();
+    });
+  }
+
+  if(remoteVideo.srcObject){
+    remoteVideo.srcObject.getTracks().forEach(track => {
+      track.stop();
+    });
+  }
 
   // *** TODO ***: set localVideo and remoteVideo source objects to null
-  localVideo.srcObject = null;
-  remoteVideo.srcObject = null;
+  if(localVideo){
+    localVideo.srcObject = null;
+  }
+
+  if(remoteVideo){
+    remoteVideo.srcObject = null;
+  }
   
   // *** TODO ***: close the peerConnection and set it to null
-  peerConnection.close();
-  peerConnection=null;
+  if(peerConnection){
+    peerConnection.close();
+    peerConnection=null;
+  }
 
   // *** TODO ***: close the dataChannel and set it to null
-  dataChannel.close();
-  dataChannel = null;
+  if(dataChannel){
+    dataChannel.close();
+    dataChannel = null;
+  }
 
   document.getElementById('dataChannelOutput').value += '*** Channel is closed ***\n';
 }

@@ -2,9 +2,6 @@ from flask import Flask, request, session
 from flask_socketio import SocketIO, emit, send, join_room, leave_room
 from collections import defaultdict
 
-from engineio.payload import Payload
-Payload.max_decode_packets = 50
-
 # ===========================================================================
 # 'Database' to store room of each user: user_id -> room_name
 rooms_db = {}
@@ -57,7 +54,7 @@ def handle_join(room_name):
         # *** TODO ***: Emit a 'joined' message back to the client, with the room_name as data.
         emit('joined', room_name)
         # *** TODO ***: Broadcast to existing client that there is a new peer
-        emit('new_peer', room_name, room=room_name, broadcast=True, include_self=False)
+        emit('new_peer', room = room_name, broadcast=True, include_self=False)
     else:
         print(f'Refusing join from user: {user_id} for FULL room: {room_name}.')
         # *** TODO ***: Emit a 'full' message back to the client, with the room_name as data.
@@ -72,18 +69,21 @@ def handle_p2pmessage(msg_type, content):
 
     # *** TODO ***: Broadcast the message to existing client in the SocketIO room.
     #               Exclude the sender of the orignal message.
-    emit(msg_type, content, room=room_name, broadcast=True, include_self=False)
+    emit(msg_type, content, room = room_name, broadcast=True, include_self=False)
 
 # *** TODO ***: Create a message handler for 'invite' messages 
+@socketio.on('invite')
 def handle_invite(data):
     handle_p2pmessage('invite', data)
 
 # *** TODO ***: Create a message handler for 'ok' messages 
-def handle_ok():
+@socketio.on('ok')
+def handle_ok(data):
     handle_p2pmessage('ok', data)
 
 # *** TODO ***: Create a message handler for 'ice_candidate' messages 
-def handle_icecandidate():
+@socketio.on('ice_candidate')
+def handle_icecandidate(data):
     handle_p2pmessage('ice_candidate', data)
 
 @socketio.on('bye')
@@ -95,7 +95,7 @@ def handle_bye(room_name):
     # *** TODO ***: Remove the user from rooms_db
     rooms_db.pop(user_id)
     # *** TODO ***: Forward the 'bye' message using p2p_message
-    handle_p2pmessage('bye', "")
+    handle_p2pmessage('bye', room_name)
     pass
 
 # ===========================================================================
